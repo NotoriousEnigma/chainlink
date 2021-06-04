@@ -125,10 +125,10 @@ func migrateFluxMonitorJob(js models.JobSpec) (job.Job, error) {
 }
 
 func BuildFMTaskDAG(js models.JobSpec) (string, *pipeline.Pipeline, error) {
-	dg := pipeline.NewTree()
+	dg := pipeline.NewGraph()
 	// First add the feeds as parallel HTTP tasks,
 	// which all coalesce into a single median task.
-	var medianTask = pipeline.NewTreeNode(dg.NewNode(), "median", map[string]string{
+	var medianTask = pipeline.NewGraphNode(dg.NewNode(), "median", map[string]string{
 		"type": pipeline.TaskTypeMedian.String(),
 	})
 	dg.AddNode(medianTask)
@@ -137,16 +137,16 @@ func BuildFMTaskDAG(js models.JobSpec) (string, *pipeline.Pipeline, error) {
 		// Support anyways just in case someone was using it without our knowledge.
 		// ALL fm jobs are POSTs see
 		// https://github.com/smartcontractkit/chainlink/blob/e5957895e3aa4947c2ddb5a4a8525041639962e9/core/services/fluxmonitor/fetchers.go#L67
-		var n *pipeline.TreeNode
+		var n *pipeline.GraphNode
 		if feed.IsObject() && feed.Get("bridge").Exists() {
-			n = pipeline.NewTreeNode(dg.NewNode(), fmt.Sprintf("feed%d", i), map[string]string{
+			n = pipeline.NewGraphNode(dg.NewNode(), fmt.Sprintf("feed%d", i), map[string]string{
 				"type":        pipeline.TaskTypeBridge.String(),
 				"method":      "POST",
 				"name":        feed.Get("bridge").String(),
 				"requestData": js.Initiators[0].InitiatorParams.RequestData.String(),
 			})
 		} else {
-			n = pipeline.NewTreeNode(dg.NewNode(), fmt.Sprintf("feed%d", i), map[string]string{
+			n = pipeline.NewGraphNode(dg.NewNode(), fmt.Sprintf("feed%d", i), map[string]string{
 				"type":        pipeline.TaskTypeHTTP.String(),
 				"method":      "POST",
 				"url":         feed.String(),
@@ -170,7 +170,7 @@ func BuildFMTaskDAG(js models.JobSpec) (string, *pipeline.Pipeline, error) {
 			} else {
 				return "", nil, errors.New("no times param on multiply task")
 			}
-			n := pipeline.NewTreeNode(dg.NewNode(), fmt.Sprintf("multiply%d", i), attrs)
+			n := pipeline.NewGraphNode(dg.NewNode(), fmt.Sprintf("multiply%d", i), attrs)
 			dg.AddNode(n)
 			dg.SetEdge(dg.NewEdge(last, n))
 			last = n
