@@ -305,7 +305,7 @@ func (r *runner) executeRun(
 		}
 	)
 
-	pipeline, err := Parse([]byte(spec.DotDagSource))
+	pipeline, err := Parse(spec.DotDagSource)
 	if err != nil {
 		return run, nil, false, err
 	}
