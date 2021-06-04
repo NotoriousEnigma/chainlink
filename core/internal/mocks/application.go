@@ -8,6 +8,8 @@ import (
 
 	chainlink "github.com/smartcontractkit/chainlink/core/services/chainlink"
 
+	feeds "github.com/smartcontractkit/chainlink/core/services/feeds"
+
 	health "github.com/smartcontractkit/chainlink/core/services/health"
 
 	job "github.com/smartcontractkit/chainlink/core/services/job"
@@ -198,6 +200,22 @@ func (_m *Application) GetExternalInitiatorManager() chainlink.ExternalInitiator
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(chainlink.ExternalInitiatorManager)
+		}
+	}
+
+	return r0
+}
+
+// GetFeedsService provides a mock function with given fields:
+func (_m *Application) GetFeedsService() feeds.Service {
+	ret := _m.Called()
+
+	var r0 feeds.Service
+	if rf, ok := ret.Get(0).(func() feeds.Service); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(feeds.Service)
 		}
 	}
 
