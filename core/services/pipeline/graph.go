@@ -161,19 +161,16 @@ func Parse(text string) (*Pipeline, error) {
 			return nil, err
 		}
 
+		// re-link the edges
+		for inputs := g.To(node.ID()); inputs.Next(); {
+			from := p.Tasks[ids[inputs.Node().ID()]]
+
+			from.Base().outputs = append(from.Base().outputs, task)
+			task.Base().inputs = append(task.Base().inputs, from)
+		}
+
 		p.Tasks = append(p.Tasks, task)
 		ids[node.ID()] = id
-	}
-
-	// re-link the edges
-	for edges := g.Edges(); edges.Next(); {
-		edge := edges.Edge()
-
-		from := p.Tasks[ids[edge.From().ID()]]
-		to := p.Tasks[ids[edge.To().ID()]]
-
-		from.Base().outputs = append(from.Base().outputs, to)
-		to.Base().inputs = append(to.Base().inputs, from)
 	}
 
 	return p, nil
